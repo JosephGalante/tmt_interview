@@ -13,19 +13,25 @@ from interview.inventory.models import (
 from interview.order.models import Order
 
 
+def create_inventory(name="Inventory Item"):
+    inventory_type = InventoryType.objects.create(name="Movie")
+    inventory_language = InventoryLanguage.objects.create(name="English")
+    inventory_tag = InventoryTag.objects.create(name="Drama")
+
+    inventory = Inventory.objects.create(
+        name=name,
+        type=inventory_type,
+        language=inventory_language,
+        metadata={"rating": "PG"},
+    )
+    inventory.tags.add(inventory_tag)
+
+    return inventory
+
+
 class DeactivateOrderViewTests(APITestCase):
     def setUp(self):
-        inventory_type = InventoryType.objects.create(name="Movie")
-        inventory_language = InventoryLanguage.objects.create(name="English")
-        inventory_tag = InventoryTag.objects.create(name="Drama")
-
-        inventory = Inventory.objects.create(
-            name="Inventory Item",
-            type=inventory_type,
-            language=inventory_language,
-            metadata={"rating": "PG"},
-        )
-        inventory.tags.add(inventory_tag)
+        inventory = create_inventory()
 
         self.order = Order.objects.create(
             inventory=inventory,
@@ -65,3 +71,30 @@ class DeactivateOrderViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(self.order.is_active)
         self.assertFalse(response.json()["is_active"])
+
+
+class OrderListCreateViewTests(APITestCase):
+    def setUp(self):
+        inventory = create_inventory()
+
+        self.url = reverse("order-list")
+        self.early_order = Order.objects.create(
+            inventory=inventory,
+            start_date=date(2024, 1, 1),
+            embargo_date=date(2024, 1, 10),
+            is_active=True,
+        )
+        self.matching_order = Order.objects.create(
+            inventory=inventory,
+            start_date=date(2024, 1, 5),
+            embargo_date=date(2024, 1, 15),
+            is_active=True,
+        )
+        self.late_order = Order.objects.create(
+            inventory=inventory,
+            start_date=date(2024, 2, 1),
+            embargo_date=date(2024, 2, 10),
+            is_active=True,
+        )
+
+   
