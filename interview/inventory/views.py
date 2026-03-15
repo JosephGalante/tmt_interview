@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.views import APIView
-from datetime import datetime
+
 from interview.inventory.models import (
     Inventory,
     InventoryLanguage,
@@ -37,30 +37,12 @@ class InventoryListCreateView(APIView):
         return Response(serializer.data, status=201)
 
     def get(self, request: Request, *args, **kwargs) -> Response:
-        try:
-            queryset = self.get_queryset()
-        except ValueError as exc:
-            return Response({"error": str(exc)}, status=400)
-
-        serializer = self.serializer_class(queryset, many=True)
+        serializer = self.serializer_class(self.get_queryset(), many=True)
 
         return Response(serializer.data, status=200)
 
     def get_queryset(self):
-        queryset = self.queryset.order_by("created_at", "id")
-        created_after = self.request.query_params.get("created_after")
-
-        if not created_after:
-            return queryset
-
-        try:
-            created_after_date = datetime.strptime(created_after, "%Y-%m-%d").date()
-        except ValueError as exc:
-            raise ValueError(
-                "created_after must be a valid date in YYYY-MM-DD format."
-            ) from exc
-
-        return queryset.filter(created_at__date__gt=created_after_date)
+        return self.queryset.all()
 
 
 class InventoryRetrieveUpdateDestroyView(APIView):
