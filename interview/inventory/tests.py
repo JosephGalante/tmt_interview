@@ -35,7 +35,9 @@ class InventoryListCreateViewTests(APITestCase):
         return inventory
 
     def test_get_returns_all_inventory_when_created_after_is_not_provided(self):
-        first_inventory = self.create_inventory("Older Item", datetime(2024, 1, 1, 10, 0))
+        first_inventory = self.create_inventory(
+            "Older Item", datetime(2024, 1, 1, 10, 0)
+        )
         second_inventory = self.create_inventory(
             "Newer Item", datetime(2024, 2, 1, 10, 0)
         )
@@ -101,7 +103,9 @@ class InventoryListCreateViewTests(APITestCase):
         self.assertEqual(response.json(), [])
 
     def test_get_treats_empty_created_after_as_unfiltered(self):
-        first_inventory = self.create_inventory("Older Item", datetime(2024, 1, 1, 10, 0))
+        first_inventory = self.create_inventory(
+            "Older Item", datetime(2024, 1, 1, 10, 0)
+        )
         second_inventory = self.create_inventory(
             "Newer Item", datetime(2024, 2, 1, 10, 0)
         )
@@ -132,4 +136,3 @@ class InventoryListCreateViewTests(APITestCase):
             [item["id"] for item in response.json()],
             [oldest_inventory.id, middle_inventory.id, newest_inventory.id],
         )
-
