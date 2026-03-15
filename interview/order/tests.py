@@ -4,29 +4,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from interview.inventory.models import (
-    Inventory,
-    InventoryLanguage,
-    InventoryTag,
-    InventoryType,
-)
 from interview.order.models import Order
-
-
-def create_inventory(name="Inventory Item"):
-    inventory_type = InventoryType.objects.create(name="Movie")
-    inventory_language = InventoryLanguage.objects.create(name="English")
-    inventory_tag = InventoryTag.objects.create(name="Drama")
-
-    inventory = Inventory.objects.create(
-        name=name,
-        type=inventory_type,
-        language=inventory_language,
-        metadata={"rating": "PG"},
-    )
-    inventory.tags.add(inventory_tag)
-
-    return inventory
+from interview.tests.helpers import create_inventory
 
 
 class DeactivateOrderViewTests(APITestCase):
