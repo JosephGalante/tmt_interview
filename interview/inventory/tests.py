@@ -5,29 +5,26 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from interview.inventory.models import (
-    Inventory,
-    InventoryLanguage,
-    InventoryTag,
-    InventoryType,
-)
+from interview.inventory.models import Inventory
+from interview.tests.helpers import create_inventory, create_inventory_dependencies
 
 
 class InventoryListCreateViewTests(APITestCase):
     def setUp(self):
         self.url = reverse("inventory-list")
-        self.inventory_type = InventoryType.objects.create(name="Movie")
-        self.inventory_language = InventoryLanguage.objects.create(name="English")
-        self.inventory_tag = InventoryTag.objects.create(name="Drama")
+        (
+            self.inventory_type,
+            self.inventory_language,
+            self.inventory_tag,
+        ) = create_inventory_dependencies()
 
     def create_inventory(self, name: str, created_at: datetime) -> Inventory:
-        inventory = Inventory.objects.create(
+        inventory = create_inventory(
             name=name,
-            type=self.inventory_type,
-            language=self.inventory_language,
-            metadata={"rating": "PG"},
+            inventory_type=self.inventory_type,
+            inventory_language=self.inventory_language,
+            inventory_tag=self.inventory_tag,
         )
-        inventory.tags.add(self.inventory_tag)
         Inventory.objects.filter(pk=inventory.pk).update(
             created_at=timezone.make_aware(created_at)
         )
